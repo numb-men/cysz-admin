@@ -10,6 +10,7 @@ import {
   getUnreadCount
 } from '@/api/user'
 import { setToken, getToken } from '@/libs/util'
+import { requests } from '../../request/requests'
 
 export default {
   state: {
@@ -74,19 +75,15 @@ export default {
   },
   actions: {
     // 登录
-    handleLogin ({ commit }, { userName, password }) {
-      userName = userName.trim()
+    handleLogin ({ commit }, loginForm) {
       return new Promise((resolve, reject) => {
-        login({
-          userName,
-          password
-        }).then(res => {
-          const data = res.data
-          commit('setToken', data.token)
-          resolve()
-        }).catch(err => {
-          reject(err)
-        })
+        requests.login(loginForm)
+          .then(res => {
+            commit('setToken', res)
+            resolve(res)
+          }).catch(err => {
+            reject(err)
+          })
       })
     },
     // 退出登录

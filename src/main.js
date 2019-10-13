@@ -2,6 +2,7 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import App from './App'
+import { requests } from './request/requests'
 import router from './router'
 import store from './store'
 import iView from 'iview'
@@ -15,6 +16,8 @@ import '@/assets/icons/iconfont.css'
 import TreeTable from 'tree-table-vue'
 import VOrgTree from 'v-org-tree'
 import 'v-org-tree/dist/v-org-tree.css'
+import manage from '@/manage'
+
 // 实际打包时应该不引入mock
 /* eslint-disable */
 if (process.env.NODE_ENV !== 'production') require('@/mock')
@@ -36,6 +39,8 @@ Vue.config.productionTip = false
  * @description 全局注册应用配置
  */
 Vue.prototype.$config = config
+Vue.prototype.$requests = requests
+Vue.prototype.$manage = manage
 /**
  * 注册指令
  */
@@ -43,7 +48,7 @@ importDirective(Vue)
 Vue.directive('clickOutside', clickOutside)
 
 /* eslint-disable no-new */
-new Vue({
+export let vm = new Vue({
   el: '#app',
   router,
   i18n,

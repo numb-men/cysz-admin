@@ -22,37 +22,45 @@ export default {
   methods: {
     resize () {
       this.dom.resize()
+    },
+    init () {
+      this.$nextTick(() => {
+        let xAxisData = Object.keys(this.value)
+        let seriesData = Object.values(this.value)
+        let option = {
+          title: {
+            text: this.text,
+            subtext: this.subtext,
+            x: 'center'
+          },
+          xAxis: {
+            type: 'category',
+            data: xAxisData
+          },
+          yAxis: {
+            type: 'value'
+          },
+          series: [{
+            data: seriesData,
+            type: 'bar'
+          }]
+        }
+        this.dom = echarts.init(this.$refs.dom, 'tdTheme')
+        this.dom.setOption(option)
+        on(window, 'resize', this.resize)
+      })
     }
   },
   mounted () {
-    this.$nextTick(() => {
-      let xAxisData = Object.keys(this.value)
-      let seriesData = Object.values(this.value)
-      let option = {
-        title: {
-          text: this.text,
-          subtext: this.subtext,
-          x: 'center'
-        },
-        xAxis: {
-          type: 'category',
-          data: xAxisData
-        },
-        yAxis: {
-          type: 'value'
-        },
-        series: [{
-          data: seriesData,
-          type: 'bar'
-        }]
-      }
-      this.dom = echarts.init(this.$refs.dom, 'tdTheme')
-      this.dom.setOption(option)
-      on(window, 'resize', this.resize)
-    })
+    this.init()
   },
   beforeDestroy () {
     off(window, 'resize', this.resize)
+  },
+  watch: {
+    value: function () {
+      this.init()
+    }
   }
 }
 </script>

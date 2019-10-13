@@ -42,5 +42,20 @@ export default {
   tree_table_page: '树状表格',
   org_tree_page: '组织结构树',
   drag_drawer_page: '可拖动抽屉',
-  tree_select_page: '树状下拉选择器'
+  tree_select_page: '树状下拉选择器',
+
+  system: '系统管理',
+  resource: '资源',
+  dict: '字典',
+  role: '角色',
+  user: '用户',
+  roleNew: '新角色',
+  roleEdit: '编辑角色',
+  userNew: '新用户',
+  userEdit: '编辑用户',
+
+  cysz: '店铺管理',
+  cyszUser: '食客管理',
+  cyszFood: '菜品管理',
+  cyszOrder: '订单管理'
 }
