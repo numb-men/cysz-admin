@@ -17,7 +17,7 @@ export default {
         let user = resData
         this.getUserRoles(id).then(resData2 => {
           user.roles = resData2
-          r(user)
+          resolve(user)
         })
       })
     })

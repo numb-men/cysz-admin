@@ -92,6 +92,8 @@ export default {
         logout(state.token).then(() => {
           commit('setToken', '')
           commit('setAccess', [])
+          commit('clearResource')
+          commit('clearUser')
           resolve()
         }).catch(err => {
           reject(err)

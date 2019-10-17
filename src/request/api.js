@@ -59,7 +59,8 @@ const api = {
 
   cyszStatsView: ['get', '/cysz/stats/view'],
   cyszStatsOrderPie: ['get', '/cysz/stats/orderPie'],
-  cyszStatsGetWeekReqBar: ['get', '/cysz/stats/weekReqBar']
+  cyszStatsGetWeekReqBar: ['get', '/cysz/stats/weekReqBar'],
+  cyszStatsFoodWeekStats: ['get', '/cysz/stats/foodWeekStats']
 }
 
 export { root, api }

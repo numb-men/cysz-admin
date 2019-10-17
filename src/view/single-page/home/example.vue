@@ -9,85 +9,48 @@ export default {
   name: 'serviceRequests',
   data () {
     return {
-      dom: null
-    }
-  },
-  methods: {
-    resize () {
-      this.dom.resize()
-    }
-  },
-  mounted () {
-    const option = {
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'cross',
-          label: {
-            backgroundColor: '#6a7985'
-          }
-        }
-      },
-      grid: {
-        top: '3%',
-        left: '1.2%',
-        right: '1%',
-        bottom: '3%',
-        containLabel: true
-      },
-      xAxis: [
-        {
-          type: 'category',
-          boundaryGap: false,
-          data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-        }
-      ],
-      yAxis: [
-        {
-          type: 'value'
-        }
-      ],
+      dom: null,
       series: [
         {
-          name: '运营商/网络服务',
+          name: '空',
           type: 'line',
-          stack: '总量',
+          stack: '销量',
           areaStyle: { normal: {
             color: '#2d8cf0'
           } },
-          data: [120, 132, 101, 134, 90, 230, 210]
+          data: [0, 0, 0, 0, 0, 0, 0]
         },
         {
-          name: '银行/证券',
+          name: '空',
           type: 'line',
-          stack: '总量',
+          stack: '销量',
           areaStyle: { normal: {
             color: '#10A6FF'
           } },
-          data: [257, 358, 278, 234, 290, 330, 310]
+          data: [0, 0, 0, 0, 0, 0, 0]
         },
         {
-          name: '游戏/视频',
+          name: '空',
           type: 'line',
-          stack: '总量',
+          stack: '销量',
           areaStyle: { normal: {
             color: '#0C17A6'
           } },
-          data: [379, 268, 354, 269, 310, 478, 358]
+          data: [0, 0, 0, 0, 0, 0, 0]
         },
         {
-          name: '餐饮/外卖',
+          name: '空',
           type: 'line',
-          stack: '总量',
+          stack: '销量',
           areaStyle: { normal: {
             color: '#4608A6'
           } },
-          data: [320, 332, 301, 334, 390, 330, 320]
+          data: [0, 0, 0, 0, 0, 0, 0]
         },
         {
-          name: '快递/电商',
+          name: '空',
           type: 'line',
-          stack: '总量',
+          stack: '销量',
           label: {
             normal: {
               show: true,
@@ -97,14 +60,69 @@ export default {
           areaStyle: { normal: {
             color: '#398DBF'
           } },
-          data: [820, 645, 546, 745, 872, 624, 258]
+          data: [0, 0, 0, 0, 0, 0, 0]
         }
       ]
     }
-    this.$nextTick(() => {
-      this.dom = echarts.init(this.$refs.dom)
-      this.dom.setOption(option)
-      on(window, 'resize', this.resize)
+  },
+  methods: {
+    resize () {
+      this.dom.resize()
+    },
+    init () {
+      const option = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'cross',
+            label: {
+              backgroundColor: '#6a7985'
+            }
+          }
+        },
+        grid: {
+          top: '3%',
+          left: '1.2%',
+          right: '1%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis: [
+          {
+            type: 'category',
+            boundaryGap: false,
+            data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+          }
+        ],
+        yAxis: [
+          {
+            type: 'value'
+          }
+        ],
+        series: this.series
+      }
+      this.$nextTick(() => {
+        this.dom = echarts.init(this.$refs.dom)
+        this.dom.setOption(option)
+        on(window, 'resize', this.resize)
+      })
+    }
+  },
+  mounted () {
+    this.$requests.cyszStatsFoodWeekStats().then(res => {
+      console.log(res)
+      // foodName: "烤韭菜"
+      // foodWeekSellNum: (7) [2, 0, 0, 0, 0, 0, 0]
+      let seriesData = []
+      for (let i in res) {
+        let foodWeekStat = res[i]
+        let dataModel = this.series[i]
+        dataModel.name = foodWeekStat.foodName
+        dataModel.data = foodWeekStat.foodWeekSellNum
+        seriesData.push(dataModel)
+      }
+      this.series = seriesData
+      this.init()
     })
   },
   beforeDestroy () {

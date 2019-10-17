@@ -10,6 +10,9 @@ export default {
     },
     addUser (state, user) {
       state.users.push(user)
+    },
+    clearUser (state) {
+      state.users = []
     }
   },
   actions: {
