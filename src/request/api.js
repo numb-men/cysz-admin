@@ -56,6 +56,7 @@ const api = {
   orderFindAll: ['get', '/cysz/order/list'],
   orderArrived: ['get', '/cysz/order/arrived'],
   orderDeleteOneById: ['delete', '/cysz/order/'],
+  orderSearch: ['post', '/cysz/order/search'],
 
   cyszStatsView: ['get', '/cysz/stats/view'],
   cyszStatsOrderPie: ['get', '/cysz/stats/orderPie'],

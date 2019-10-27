@@ -1,6 +1,6 @@
 <style scoped>
   .orderDetail {
-    margin: 0 15%;
+    margin: 0 30px;
   }
   .orderDetail h2 {
     display: flex;
@@ -11,24 +11,24 @@
   }
   .orderDetail h2 span {
     display: block;
-    width: 305px;
+    width: 350px;
     height: 30px;
   }
-  .phone {
+  .split {
     padding-bottom: 20px;
     margin-bottom: 30px;
-    border-bottom: 2px solid #eee;
+    border-bottom: 2px solid #dfdfdf;
   }
   .allPrice {
     padding-bottom: 20px;
     margin-top: 30px;
-    border-top: 2px solid #eee;
+    border-top: 2px solid #dfdfdf;
   }
   .orderItem {
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
-    margin: 10px 0;
+    justify-content: space-between;
+    margin: 10px 40px;
   }
 </style>
 <template>
@@ -40,62 +40,164 @@
           <h2><span>订单编号</span>{{orderDetail.id}}</h2>
           <h2><span>订单状态</span>{{orderDetail.status}}</h2>
           <h2><span>食客用户名</span>{{orderDetail.cyszUser.username}}</h2>
-          <h2 class="phone"><span>食客电话</span>{{orderDetail.cyszUser.mobile}}</h2>
+          <h2><span>食客电话</span>{{orderDetail.cyszUser.mobile}}</h2>
+          <h2 class="split"><span>下单时间</span>{{orderDetail.createDate}}</h2>
 
           <div class="orderItem" v-for="item of orderDetail.orderItems">
             <img style="width: 50px;height: 35px;" alt :src="item.food.image">
-            <h3 style="line-height: 35px;">{{item.food.title}} * {{item.num}}</h3>
+            <h3 style="line-height: 35px;width: 350px;">{{item.food.title}} x {{item.num}}</h3>
             <h3 style="margin-right: 20px;line-height: 35px;">￥{{item.price}}</h3>
           </div>
 
-          <h2 class="allPrice"><span>订单总价</span>￥{{orderDetail.allPrice}}</h2>
+          <h2 class="allPrice">
+            <span style="width: 450px">订单总价</span> ￥{{orderDetail.allPrice}}
+          </h2>
         </div>
       </Row>
       <Row slot="footer" type="flex" justify="end" align="middle">
-        <Button :disabled="orderDetail.status !== '订单配送中'" style="margin-right: 8px;" @click="arived">确认送达</Button>
+        <Button :disabled="orderDetail.status !== '订单配送中'" style="margin-right: 8px;" @click="arrived">确认送达</Button>
         <Button type="primary" @click="closeDetail">关闭</Button>
       </Row>
     </Modal>
+
     <div id="order" class="order">
       <Row>
-        <iCol span="6" v-for="order in orders" style="padding:10px;" :key="order.id">
-          <Card style="width: 350px;">
-            <div style="text-align:center" v-on:click="showDetail(order.id)">
-              <div style="position:absolute; right:5px; top:5px; cursor:pointer;"
-                   v-on:click.stop="deleteOrder(order.id, $event)">
-                <Icon type="md-close" size="20"></Icon>
-              </div>
-              <img alt style="width: 230px;height: 140px;" :src="order.orderItems[0].food.image">
-              <Row>
-                <h3>{{order.content}}：￥{{order.allPrice}}：{{order.status}}</h3>
-              </Row>
-            </div>
-          </Card>
+        <iCol span="14">
+          <Input v-model="searchInput" icon="ios-search"
+                 placeholder="输入姓名、电话、邮箱进行搜索.." @on-enter="search"/>
+        </iCol>
+        <iCol span="6">
+          <Button type="primary" style="margin: 0 8px 0 16px" @click="search">查询用户</Button>
         </iCol>
       </Row>
+      <div style="text-align:center;margin: 20px 10px;">
+        <Row :gutter="16">
+          <Table :columns="columns" :data="orders"/>
+        </Row>
+        <Page style="margin-top: 8px;"
+              :total="dataCount" :page-size="pageSize" @on-change="handlePageChange" show-total/>
+      </div>
     </div>
+
   </Card>
 </template>
 
 <script>
+import { timestampFormat } from '@/utils'
 
 export default {
   name: 'order',
   data () {
     return {
       showOrder: false,
-      orderDetail: {},
-      orders: [
-
+      orderDetail: {
+        cyszUser: {},
+        orderItems: []
+      },
+      orders: [],
+      dataCount: 0,
+      pageSize: 10,
+      currentPageNum: 0,
+      searchInput: '',
+      columns: [
+        {
+          key: 'id',
+          title: '主键',
+          width: 120
+        },
+        {
+          key: 'username',
+          title: '客户',
+          width: 120
+        },
+        {
+          key: 'mobile',
+          title: '客户手机号'
+        },
+        {
+          key: 'foodNum',
+          title: '菜品数',
+          width: 100
+        },
+        {
+          key: 'content',
+          title: '详情',
+          width: 380
+        },
+        {
+          key: 'allPrice',
+          title: '订单总价'
+        },
+        {
+          key: 'createDate',
+          title: '下单时间'
+        },
+        {
+          key: 'status',
+          title: '订单状态'
+        },
+        {
+          title: '操作',
+          align: 'center',
+          width: 190,
+          key: 'handle',
+          render: (h, params) => {
+            return h('div', [
+              h(
+                'Button',
+                {
+                  props: {
+                    type: 'primary'
+                  },
+                  on: {
+                    click: () => {
+                      this.showDetail(params.row.id)
+                    }
+                  }
+                },
+                '查看'
+              ),
+              h(
+                'Button',
+                {
+                  style: {
+                    margin: '0 5px'
+                  },
+                  props: {
+                    type: 'error'
+                  },
+                  on: {
+                    click: () => {
+                      this.deleteOrder(params.row.id)
+                    }
+                  }
+                },
+                '删除'
+              )
+            ])
+          }
+        }
       ]
     }
   },
-  computed: {},
+  computed: {
+    searchForm () {
+      return {
+        username: this.searchInput,
+        mobile: this.searchInput,
+        status: this.searchInput
+      }
+    }
+  },
   methods: {
+    handlePageChange (pageNum) {
+      this.currentPageNum = pageNum - 1
+      this.search()
+    },
     showDetail (id) {
       for (let order of this.orders) {
         if (order.id === id) {
-          this.orderDetail = order
+          this.orderDetail = order.orderDetail
           break
         }
       }
@@ -104,17 +206,11 @@ export default {
     closeDetail () {
       this.showOrder = false
     },
-    arived () {
+    arrived () {
       this.$requests.orderArrived({ id: this.orderDetail.id }).then(res => {
         for (let i = 0; i < this.orders.length; i++) {
           let order = this.orders[i]
           if (order.id === this.orderDetail.id) {
-            let allNum = 0
-            for (let item of res.orderItems) {
-              allNum += item.num
-            }
-            res.content = res.orderItems[0].food.title +
-              (allNum === 1 ? '' : `等${allNum}件`)
             this.$set(this.orders, i, res)
             this.showOrder = false
           }
@@ -134,34 +230,28 @@ export default {
         onCancel: () => {
           this.$requests.orderDeleteOneById({ id }).then(res => {
             this.$Message.success('删除成功')
-            let orders = []
-            for (let order of this.orders) {
-              if (order.id !== id) {
-                orders.push(order)
-              }
-            }
-            this.orders = orders
+            this.search()
           })
         }
       })
     },
-    search () {
-      this.$requests.orderFindAll().then(res => {
-        for (let order of res) {
-          let allNum = 0
-          for (let item of order.orderItems) {
-            allNum += item.num
+    search (reset) {
+      if (reset) {
+        this.currentPageNum = 0
+      }
+      this.$requests.orderSearch({
+          pageNumber: this.currentPageNum,
+          pageSize: this.pageSize
+        }, this.searchForm)
+        .then(res => {
+          this.orders = res.content
+          for (let order of this.orders) {
+            order.createDate = timestampFormat(order.createDate)
+            order.allPrice = order.allPrice + '元'
           }
-          order.content = order.orderItems[0].food.title +
-            (allNum === 1 ? '' : `等${allNum}件`)
-
-          this.orders.push(order)
-        }
-
-        if (res.length > 0) {
-          this.orderDetail = res[0]
-        }
-      })
+          this.orderDetail = this.orders.length > 0 ? this.orders[0].orderDetail : {}
+          this.dataCount = res.totalElements
+        })
     }
   },
   created () {
